@@ -89,34 +89,34 @@ export const getPostById = async (req, res) => {
     }
 };
 
-export const productImage =async(req,res)=>{
-    const {id} = req.params
-    const post = await postModels.findById(id);
-    if (!post) {
-        return res.status(404).json({ message: "Post not found" });
-    }
-    if (!req.file || !req.file.path) {
-        return res.status(400).json({ message: "No image file uploaded" });
-    }
+// export const productImage =async(req,res)=>{
+//     const {id} = req.params
+//     const post = await postModels.findById(id);
+//     if (!post) {
+//         return res.status(404).json({ message: "Post not found" });
+//     }
+//     if (!req.file || !req.file.path) {
+//         return res.status(400).json({ message: "No image file uploaded" });
+//     }
 
-    console.log("File uploaded:", req.file.path);
+//     console.log("File uploaded:", req.file.path);
 
-        const uploadResult = await uploadImageToCloudinary(req.file.path);
-        if (!uploadResult) {
-            console.error("Cloudinary upload error:", uploadResult);
-            await fs.unlink(req.file.path); // Cleanup if upload fails
-            return res.status(500).json({ message: "Error occurred while uploading image" });
-        }
-
-
-            post.images = uploadResult, // Store the image URL in the post
-            await post.save();
+//         const uploadResult = await uploadImageToCloudinary(req.file.path);
+//         if (!uploadResult) {
+//             console.error("Cloudinary upload error:", uploadResult);
+//             await fs.unlink(req.file.path); // Cleanup if upload fails
+//             return res.status(500).json({ message: "Error occurred while uploading image" });
+//         }
 
 
-        res.status(201).json({ message: "image uplaord successfully", post });
+//             post.images = uploadResult, // Store the image URL in the post
+//             await post.save();
 
 
-}
+//         res.status(201).json({ message: "image uplaord successfully", post });
+
+
+// }
 
 
 export const createPost = async (req, res) => {
@@ -126,19 +126,19 @@ export const createPost = async (req, res) => {
         return res.status(400).json({ message: "All fields are required" });
     }
 
-    // if (!req.file || !req.file.path) {
-    //     return res.status(400).json({ message: "No image file uploaded" });
-    // }
+    if (!req.file || !req.file.path) {
+        return res.status(400).json({ message: "No image file uploaded" });
+    }
 
     try {
-        // console.log("File uploaded:", req.file.path);
+        console.log("File uploaded:", req.file.path);
 
-        // const uploadResult = await uploadImageToCloudinary(req.file.path);
-        // if (!uploadResult) {
-        //     console.error("Cloudinary upload error:", uploadResult);
-        //     await fs.unlink(req.file.path); // Cleanup if upload fails
-        //     return res.status(500).json({ message: "Error occurred while uploading image" });
-        // }
+        const uploadResult = await uploadImageToCloudinary(req.file.path);
+        if (!uploadResult) {
+            console.error("Cloudinary upload error:", uploadResult);
+            await fs.unlink(req.file.path); // Cleanup if upload fails
+            return res.status(500).json({ message: "Error occurred while uploading image" });
+        }
 
         // Find the user by autorId
         const User = await userModels.findById(autorId);
@@ -157,7 +157,7 @@ export const createPost = async (req, res) => {
             price,
             category,
             stock,
-            // images: uploadResult, // Store the image URL in the post
+            images: uploadResult, // Store the image URL in the post
             autorId,
         });
 
