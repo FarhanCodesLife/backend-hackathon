@@ -12,7 +12,7 @@ import swaggerJSDoc from "swagger-jsdoc";
 const app = express()
 const port = process.env.PORT || 5000
 app.use(cors({
-    origin:"https://backend-hackathon-nu.vercel.app/",
+    origin:"*",
     credentials:true
 }))
 app.use(cookieParser())
