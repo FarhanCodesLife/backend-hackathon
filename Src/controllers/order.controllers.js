@@ -2,6 +2,7 @@ import orderModels from "../models/order.models.js";
 import postModels from "../models/post.models.js";
 import userModels from "../models/user.models.js";
 
+// Create an order
 export const orderPost = async (req, res) => {
     const { autorId, products } = req.body;
 
@@ -17,17 +18,26 @@ export const orderPost = async (req, res) => {
             return res.status(404).json({ message: "User not found." });
         }
 
-        // Fetch product details and calculate total amount
+        // Fetch all product details in one query
+        const productIds = products.map((product) => product.productId);
+        const posts = await postModels.find({ _id: { $in: productIds } });
+
+        if (posts.length !== productIds.length) {
+            return res.status(404).json({ message: "Some products were not found." });
+        }
+
+        // Prepare items and calculate total amount
         const items = [];
         let totalAmount = 0;
 
         for (const product of products) {
-            const post = await postModels.findById(product.productId); // Assuming `productId` is in `products`
-            if (!post) {
-                return res.status(404).json({ message: `Product with ID ${product.productId} not found.` });
+            const post = posts.find((p) => p._id.toString() === product.productId);
+            const quantity = product.quantity || 1;
+
+            if (!post.price) {
+                return res.status(400).json({ message: `Product ${post.name} does not have a price.` });
             }
 
-            const quantity = product.quantity || 1; // Default quantity is 1 if not provided
             totalAmount += post.price * quantity;
 
             items.push({
@@ -38,12 +48,12 @@ export const orderPost = async (req, res) => {
             });
         }
 
-        // Create order
+        // Create the order
         const order = await orderModels.create({
             user: user._id,
             items,
             totalAmount,
-            orderStatus: "Pending", // Default status can be changed as needed
+            orderStatus: "Pending", // Default status
         });
 
         // Send success response
@@ -57,23 +67,22 @@ export const orderPost = async (req, res) => {
     }
 };
 
-
- export const allOrders = async (req,res)=>{
-    try{
-
+export const allOrders = async (req, res) => {
+    try {
         const orders = await orderModels.find();
-        
+
+        if (!orders || orders.length === 0) {
+            return res.status(404).json({ message: "No orders found." });
+        }
+
         res.status(200).json({
-            orders
-        })
+            orders,
+        });
+    } catch (error) {
+        console.error("Error fetching orders:", error.message);
+        res.status(500).json({
+            message: "Internal Server Error",
+            error: error.message,
+        });
     }
-    catch (error){
-res.status(400).json({
-    massage:"Order not founds"
-})
-console.log(error);
-
-    }
-    
-}
-
+};

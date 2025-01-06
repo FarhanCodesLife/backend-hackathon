@@ -5,8 +5,8 @@ dotenv.config();
 import connectDB from "./Src/db/index.js";
 import userRouter from "./Src/routes/user.route.js";
 import postRouter from "./Src/routes/post.route.js";
+import orderRouter from "./Src/routes/order.route.js";
 import cookieParser from "cookie-parser";
-import orderPost from "./Src/controllers/order.controllers.js";
 const app = express()
 const port = process.env.PORT || 5000
 app.use(cors({
@@ -18,7 +18,7 @@ app.use(express.json())
 
 app.use("/api/user",userRouter)
 app.use("/api/post",postRouter)
-app.use("/api/admin",orderPost)
+app.use("/api/admin",orderRouter)
 
 app.get("/", (req, res) => {
     res.send("Hello World!")
