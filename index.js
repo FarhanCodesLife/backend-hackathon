@@ -7,10 +7,12 @@ import userRouter from "./Src/routes/user.route.js";
 import postRouter from "./Src/routes/post.route.js";
 import orderRouter from "./Src/routes/order.route.js";
 import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express"
+import swaggerJSDoc from "swagger-jsdoc";
 const app = express()
 const port = process.env.PORT || 5000
 app.use(cors({
-    origin:"http://localhost:5173",
+    origin:"https://backend-hackathon-nu.vercel.app/",
     credentials:true
 }))
 app.use(cookieParser())
@@ -24,7 +26,31 @@ app.get("/", (req, res) => {
     res.send("Hello World!")
 })
 
+// Swagger setup
+const swaggerOptions = {
+    definition: {
+      openapi: '3.0.0',
+      info: {
+        title: 'User API',
+        version: '1.0.0',
+        description: 'API for managing user authentication, registration, and more',
+        contact: {
+            name:"muhammad farhan",
+            email:"farhansmit0318@gmail.com",
+            phone:"03182127256"
+        }
+      },
+      servers: [
+        {
+          url: 'http://localhost:5000',
+        },
+      ],
+    },
+    apis: ['./Src/routes/*.js'], // Correct path to routes
+};
 
+const swaggerDocs = swaggerJSDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 connectDB()
 .then(()=>{
