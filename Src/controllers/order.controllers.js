@@ -48,6 +48,11 @@ export const orderPost = async (req, res) => {
             });
         }
 
+        
+
+
+
+
         // Create the order
         const order = await orderModels.create({
             user: user._id,
@@ -55,6 +60,9 @@ export const orderPost = async (req, res) => {
             totalAmount,
             orderStatus: "Pending", // Default status
         });
+
+        user.orders.push(order._id)
+        await user.save()
 
         // Send success response
         res.status(201).json({
@@ -67,9 +75,11 @@ export const orderPost = async (req, res) => {
     }
 };
 
+// Get all orders
 export const allOrders = async (req, res) => {
     try {
-        const orders = await orderModels.find();
+        // Fetch all orders and populate user and products
+        const orders = await orderModels.find().populate("user").populate("items.product");
 
         if (!orders || orders.length === 0) {
             return res.status(404).json({ message: "No orders found." });

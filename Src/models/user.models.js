@@ -27,17 +27,14 @@ const userSchema = new mongoose.Schema({
         }
     ],
 
-    orders:[[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
-    },
+    orders: [
         {
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Post"
-    }
-]
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Order",
+        },
+    ],
 
-    ]
+    
 
     
 });
