@@ -4,14 +4,12 @@ import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 
-// Cloudinary configuration
 cloudinary.config({
-    cloud_name: "dwuc4qz3n",
-    api_key: "237728971423496",
-    api_secret: "8Q6ZLV2ouehlYs67BTGq86l2R98",
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET_CLOUD,
 });
 
-// Multer storage configuration
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "./uploads");
@@ -22,7 +20,6 @@ const storage = multer.diskStorage({
     },
 });
 
-// Multer file validation: Only images allowed with a max size of 5MB
 const upload = multer({
     storage: storage,
     fileFilter: (req, file, cb) => {
@@ -34,7 +31,6 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }, // Max 5MB file size
 });
 
-// Upload image to Cloudinary
 const uploadImageToCloudinary = async (localpath) => {
     try {
         const uploadResult = await cloudinary.uploader.upload(localpath, {
@@ -52,7 +48,7 @@ const uploadImageToCloudinary = async (localpath) => {
 // Get all posts
 export const getAllPosts = async (req, res) => {
     const page = parseInt(req.query.page) || 1; // Ensuring page is an integer
-    const limit = parseInt(req.query.limit) || 3; // Ensuring limit is an integer
+    const limit = parseInt(req.query.limit) || 10; // Ensuring limit is an integer
   
     const skip = (page - 1) * limit;
 
@@ -93,31 +89,51 @@ export const getPostById = async (req, res) => {
     }
 };
 
-// Create a new post
-export const createPost = async (req, res) => {
-    const { name, description, price, category, stock, autorId } = req.body;
-
-    // Validate required fields
-    if (!name || !description || !price || !autorId) {
-        return res.status(400).json({ message: "All fields are required" });
-    }
-
-    // Check if an image file is uploaded
+export const productImage =async(req,res)=>{
     if (!req.file || !req.file.path) {
         return res.status(400).json({ message: "No image file uploaded" });
     }
 
-    try {
-        // Log the incoming file path for debugging
-        console.log("File uploaded:", req.file.path);
+    console.log("File uploaded:", req.file.path);
 
-        // Upload the image to Cloudinary
         const uploadResult = await uploadImageToCloudinary(req.file.path);
         if (!uploadResult) {
             console.error("Cloudinary upload error:", uploadResult);
             await fs.unlink(req.file.path); // Cleanup if upload fails
             return res.status(500).json({ message: "Error occurred while uploading image" });
         }
+
+        const post = await postModels.create({
+
+            images: uploadResult, // Store the image URL in the post
+            autorId,
+        });
+
+
+
+}
+
+
+export const createPost = async (req, res) => {
+    const { name, description, price, category, stock, autorId } = req.body;
+
+    if (!name || !description || !price || !autorId) {
+        return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // if (!req.file || !req.file.path) {
+    //     return res.status(400).json({ message: "No image file uploaded" });
+    // }
+
+    try {
+        // console.log("File uploaded:", req.file.path);
+
+        // const uploadResult = await uploadImageToCloudinary(req.file.path);
+        // if (!uploadResult) {
+        //     console.error("Cloudinary upload error:", uploadResult);
+        //     await fs.unlink(req.file.path); // Cleanup if upload fails
+        //     return res.status(500).json({ message: "Error occurred while uploading image" });
+        // }
 
         // Find the user by autorId
         const User = await userModels.findById(autorId);
@@ -136,7 +152,7 @@ export const createPost = async (req, res) => {
             price,
             category,
             stock,
-            images: uploadResult, // Store the image URL in the post
+            // images: uploadResult, // Store the image URL in the post
             autorId,
         });
 
@@ -165,8 +181,8 @@ export const createPost = async (req, res) => {
 
 // Edit a post
 export const editPost = async (req, res) => {
-    const { id } = req.params;
-    const { name, description, price, category, stock, images } = req.body;
+    const {id} = req.params
+    const { name, description, price, } = req.body;
 
     try {
         const post = await postModels.findById(id);
@@ -178,9 +194,6 @@ export const editPost = async (req, res) => {
         post.name = name || post.name;
         post.description = description || post.description;
         post.price = price || post.price;
-        post.category = category || post.category;
-        post.stock = stock || post.stock;
-        post.images = images || post.images;
 
         await post.save();
         res.status(200).json({ message: "Post updated successfully", post });
@@ -193,15 +206,15 @@ export const editPost = async (req, res) => {
 export const deletePost = async (req, res) => {
     const { id } = req.params;
     try {
-        const post = await postModels.findById(id);
+        const post = await postModels.findByIdAndDelete(id);
         if (!post) {
             return res.status(404).json({ message: "Post not found" });
         }
-        await post.remove();
         res.status(200).json({ message: "Post deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 export { upload };

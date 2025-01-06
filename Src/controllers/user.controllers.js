@@ -33,7 +33,7 @@ const transporter = nodemailer.createTransport({
 
 // Create user function
 export const createUser = async (req, res) => {
-  const { name, email, password, isAdmin } = req.body;
+  const { name, email, password, role } = req.body;
 
   // Validate required fields
   if (!name || !email || !password) {
@@ -41,30 +41,26 @@ export const createUser = async (req, res) => {
   }
 
   try {
-    // Check if the user already exists
     const existingUser = await userModels.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Hash the password
     const hashPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
     const user = await userModels.create({
       name,
       email,
       password: hashPassword,
-      isAdmin,
+      role,
     });
 
-    // Send email (dummy email setup)
     const info = await transporter.sendMail({
-      from: '"Kyle Glover 👻" <kyle.glover85@ethereal.email>', // sender address
-      to: email, // send to the user's email
+      from: '"Kyle Glover 👻" <kyle.glover85@ethereal.email>', 
+      to: email, 
       subject: "Welcome to the platform!",
-      text: `Hi ${name}, welcome to our platform!`, // Plain text body
-      html: `<b>Hi ${name},</b><p>Welcome to our platform!</p>`, // HTML body
+      text: `Hi ${name}, welcome to our platform!`, 
+      html: `<b>Hi ${name},</b><p>Welcome to our platform!</p>`, 
     });
 
     console.log("Message sent: %s", info.messageId);
@@ -80,33 +76,27 @@ export const createUser = async (req, res) => {
   }
 };
 
-// Login user function
 export const logInUser = async (req, res) => {
   const { email, password } = req.body;
 
-  // Validate required fields
   if (!email || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
   try {
-    // Find the user
     const user = await userModels.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid password" });
     }
 
-    // Generate tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // Set refresh token as a cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

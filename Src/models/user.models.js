@@ -14,17 +14,32 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    isAdmin: {
-        type: Boolean,
+    
+    role: {
+        type: String,
         required: true,
-        default: false,
+        
     },
     posts:[
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Post",
         }
+    ],
+
+    orders:[[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"
+    },
+        {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Post"
+    }
+]
+
     ]
+
+    
 });
 
 
