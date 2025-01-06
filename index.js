@@ -42,7 +42,7 @@ const swaggerOptions = {
       },
       servers: [
         {
-          url: process.env.NODE_ENV === 'production' ? 'https://backend-hackathon-nu.vercel.app/' : 'http://localhost:5000', // Automatically switch URLs
+          url: 'https://backend-hackathon-nu.vercel.app/' // Automatically switch URLs
         },
       ],
     },
