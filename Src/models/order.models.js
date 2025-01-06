@@ -1,3 +1,5 @@
+import mongoose from "mongoose"
+
 const OrderSchema = new mongoose.Schema({
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -25,3 +27,6 @@ const OrderSchema = new mongoose.Schema({
       default: Date.now,
     },
   });
+
+
+ export default mongoose.model("Orders", OrderSchema); 

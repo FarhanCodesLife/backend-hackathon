@@ -5,9 +5,9 @@ import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 
 cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET_CLOUD,
+    cloud_name:"dwuc4qz3n" ,
+    api_key:"237728971423496" ,
+    api_secret: "8Q6ZLV2ouehlYs67BTGq86l2R98",
 });
 
 const storage = multer.diskStorage({
@@ -90,6 +90,11 @@ export const getPostById = async (req, res) => {
 };
 
 export const productImage =async(req,res)=>{
+    const {id} = req.params
+    const post = await postModels.findById(id);
+    if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+    }
     if (!req.file || !req.file.path) {
         return res.status(400).json({ message: "No image file uploaded" });
     }
@@ -103,12 +108,12 @@ export const productImage =async(req,res)=>{
             return res.status(500).json({ message: "Error occurred while uploading image" });
         }
 
-        const post = await postModels.create({
 
-            images: uploadResult, // Store the image URL in the post
-            autorId,
-        });
+            post.images = uploadResult, // Store the image URL in the post
+            await post.save();
 
+
+        res.status(201).json({ message: "image uplaord successfully", post });
 
 
 }
