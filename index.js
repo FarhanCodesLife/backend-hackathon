@@ -43,7 +43,11 @@ const swaggerOptions = {
       servers: [
         {
           url: 'http://localhost:5000',
+
         },
+        {
+            url: 'https://backend-hackathon-nu.vercel.app/'
+        }
       ],
     },
     apis: ['./Src/routes/*.js'], // Correct path to routes
