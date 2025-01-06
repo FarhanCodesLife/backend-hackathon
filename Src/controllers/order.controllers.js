@@ -2,7 +2,7 @@ import orderModels from "../models/order.models.js";
 import postModels from "../models/post.models.js";
 import userModels from "../models/user.models.js";
 
-const orderPost = async (req, res) => {
+export const orderPost = async (req, res) => {
     const { autorId, products } = req.body;
 
     try {
@@ -58,10 +58,10 @@ const orderPost = async (req, res) => {
 };
 
 
-export const allOrders = async (req,res)=>{
+ export const allOrders = async (req,res)=>{
     try{
 
-        const orders = await postModels.find();
+        const orders = await orderModels.find();
         
         res.status(200).json({
             orders
@@ -77,4 +77,3 @@ console.log(error);
     
 }
 
-export default orderPost;
